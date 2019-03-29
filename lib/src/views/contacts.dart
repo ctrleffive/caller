@@ -1,46 +1,96 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
-import 'package:cached_network_image/cached_network_image.dart';
+class Contacts extends StatefulWidget {
+  @override
+  _ContactsState createState() => _ContactsState();
+}
 
-class Contacts extends StatelessWidget {
+class _ContactsState extends State<Contacts> {
+  final StreamController<double> _scrollStream = StreamController<double>();
+  final ScrollController _scrollController = ScrollController();
+
+  void _listenForBottom() {
+    final double currentPosition = this._scrollController.offset;
+    final double maxPosition = this._scrollController.position.extentInside;
+    if (currentPosition > maxPosition) {
+      this._scrollStream.sink.add(currentPosition);
+    } else {
+      this._scrollStream.sink.add(0);
+    }
+  }
+
+  @override
+  void initState() {
+    this._scrollController.addListener(this._listenForBottom);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollStream.close();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: <Widget>[
-          SliverAppBar(
-            expandedHeight: 120,
-            backgroundColor: Colors.transparent,
-            flexibleSpace: FlexibleSpaceBar(
-              background: SafeArea(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: 25,
-                    right: 25,
-                    top: 15,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      _ContactsHeader(),
-                      SizedBox(height: 20),
-                      _SearchBar(),
-                    ],
+      body: Stack(
+        children: <Widget>[
+          Positioned(
+            bottom: 0,
+            left: 8,
+            right: 8,
+            child: StreamBuilder<double>(
+              initialData: 0,
+              stream: this._scrollStream.stream,
+              builder: (_, AsyncSnapshot<double> heightSnap) {
+                return Container(
+                  color: Theme.of(context).primaryColor,
+                  height: heightSnap.data,
+                );
+              },
+            ),
+          ),
+          CustomScrollView(
+            controller: this._scrollController,
+            slivers: <Widget>[
+              SliverAppBar(
+                expandedHeight: 120,
+                backgroundColor: Colors.transparent,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: SafeArea(
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: 25,
+                        right: 25,
+                        top: 15,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          _ContactsHeader(),
+                          SizedBox(height: 20),
+                          _SearchBar(),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  _Favourites(),
-                  _ContactsLister(),
-                ],
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    _Favourites(),
+                    SizedBox(height: 10),
+                    _ContactsLister(),
+                  ],
+                ),
               ),
-            ),
+            ],
           ),
         ],
       ),
@@ -57,10 +107,18 @@ class _ContactsLister extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(35),
           topRight: Radius.circular(35),
+        ),
+        gradient: LinearGradient(
+          colors: [
+            Theme.of(context).primaryColor,
+            Theme.of(context).accentColor,
+          ],
+          begin: Alignment.bottomLeft,
+          end: Alignment.topRight,
+          stops: [0.1, 1],
         ),
       ),
       padding: EdgeInsets.fromLTRB(20, 20, 20, 5),
@@ -68,7 +126,7 @@ class _ContactsLister extends StatelessWidget {
       width: MediaQuery.of(context).size.width,
       child: Column(
         children: List.generate(10, (int index) {
-          return _CallerTile();
+          return _CallerTile(index: index);
         }),
       ),
     );
@@ -76,9 +134,9 @@ class _ContactsLister extends StatelessWidget {
 }
 
 class _CallerTile extends StatelessWidget {
-  const _CallerTile({
-    Key key,
-  }) : super(key: key);
+  final int index;
+
+  const _CallerTile({Key key, this.index}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +154,7 @@ class _CallerTile extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 25,
                   backgroundColor: Colors.white10,
-                  // backgroundImage: CachedNetworkImageProvider(),
+                  backgroundImage: NetworkImage('http://i.pravatar.cc/100?tile${this.index}'),
                 ),
               ),
               SizedBox(width: 15),
@@ -162,7 +220,10 @@ class _Favourites extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 25,
                   backgroundColor: Colors.grey,
-                  // backgroundImage: CachedNetworkImageProvider(),
+                  child: ClipOval(
+                    clipBehavior: Clip.hardEdge,
+                    child: Image.network('http://i.pravatar.cc/100?fav$index'),
+                  ),
                 ),
               );
             },
@@ -230,7 +291,7 @@ class _ContactsHeader extends StatelessWidget {
           shape: CircleBorder(),
           child: CircleAvatar(
             backgroundColor: Colors.grey,
-            // backgroundImage: CachedNetworkImageProvider(),
+            backgroundImage: NetworkImage('http://i.pravatar.cc/100'),
           ),
         ),
       ],

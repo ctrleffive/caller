@@ -9,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cached_network_image: ^0.7.0
 
 flutter:
   uses-material-design: true
