@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:caller/src/views/callin.dart';
 import 'package:flutter/material.dart';
 
 import 'package:page_transition/page_transition.dart';
@@ -280,6 +281,18 @@ class _ContactsHeader extends StatelessWidget {
     Key key,
   }) : super(key: key);
 
+  void _callIn(BuildContext context) {
+    Navigator.push(
+      context,
+      PageTransition(
+        child: CallIn(),
+        type: PageTransitionType.fade,
+        duration: Duration(milliseconds: 200),
+        alignment: Alignment.center,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -302,13 +315,16 @@ class _ContactsHeader extends StatelessWidget {
             ),
           ],
         ),
-        Card(
-          margin: EdgeInsets.all(0),
-          elevation: 5,
-          shape: CircleBorder(),
-          child: CircleAvatar(
-            backgroundColor: Colors.grey,
-            backgroundImage: CachedNetworkImageProvider('http://i.pravatar.cc/100'),
+        InkWell(
+          onTap: () => this._callIn(context),
+          child: Card(
+            margin: EdgeInsets.all(0),
+            elevation: 5,
+            shape: CircleBorder(),
+            child: CircleAvatar(
+              backgroundColor: Colors.grey,
+              backgroundImage: CachedNetworkImageProvider('http://i.pravatar.cc/100'),
+            ),
           ),
         ),
       ],
