@@ -2,6 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import 'package:page_transition/page_transition.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
+import 'package:caller/src/views/callout.dart';
+
 class Contacts extends StatefulWidget {
   @override
   _ContactsState createState() => _ContactsState();
@@ -138,6 +143,18 @@ class _CallerTile extends StatelessWidget {
 
   const _CallerTile({Key key, this.index}) : super(key: key);
 
+  void _performCall(BuildContext context) {
+    Navigator.push(
+      context,
+      PageTransition(
+        child: CallOut(),
+        type: PageTransitionType.fade,
+        duration: Duration(milliseconds: 200),
+        alignment: Alignment.center,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -154,7 +171,7 @@ class _CallerTile extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 25,
                   backgroundColor: Colors.white10,
-                  backgroundImage: NetworkImage('http://i.pravatar.cc/100?tile${this.index}'),
+                  backgroundImage: CachedNetworkImageProvider('http://i.pravatar.cc/100?tile${this.index}'),
                 ),
               ),
               SizedBox(width: 15),
@@ -177,7 +194,7 @@ class _CallerTile extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.call),
-            onPressed: () {},
+            onPressed: () => this._performCall(context),
             color: Colors.white,
           ),
         ],
@@ -291,7 +308,7 @@ class _ContactsHeader extends StatelessWidget {
           shape: CircleBorder(),
           child: CircleAvatar(
             backgroundColor: Colors.grey,
-            backgroundImage: NetworkImage('http://i.pravatar.cc/100'),
+            backgroundImage: CachedNetworkImageProvider('http://i.pravatar.cc/100'),
           ),
         ),
       ],

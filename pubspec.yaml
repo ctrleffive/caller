@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  page_transition: ^1.0.9
+  cached_network_image: ^0.7.0
 
 flutter:
   uses-material-design: true
